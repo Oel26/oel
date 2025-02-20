@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Server Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.27.2/axios.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="flex flex-col items-center justify-center min-h-screen">
+        <h1 class="text-3xl font-bold mb-6">Minecraft Server Status</h1>
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
+            <p class="text-lg">Server: <span id="server-ip" class="font-semibold">example.com</span></p>
+            <p class="text-lg mt-2">Status: <span id="server-status" class="text-yellow-400">Prüfen...</span></p>
+            <p class="text-lg mt-2">Spieler online: <span id="player-count" class="font-semibold">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        async function fetchServerStatus() {
+            const serverIP = "example.com";
+            try {
+                const response = await axios.get(`https://api.mcsrvstat.us/2/${serverIP}`);
+                const data = response.data;
+                document.getElementById("server-ip").textContent = serverIP;
+                document.getElementById("server-status").textContent = data.online ? "Online" : "Offline";
+                document.getElementById("server-status").classList.add(data.online ? "text-green-400" : "text-red-400");
+                document.getElementById("player-count").textContent = data.players.online;
+            } catch (error) {
+                document.getElementById("server-status").textContent = "Fehler beim Abrufen";
+                document.getElementById("server-status").classList.add("text-red-400");
+            }
+        }
+        
+        fetchServerStatus();
+    </script>
+</body>
+</html>
