@@ -20,6 +20,8 @@
             <p class="text-lg mt-2">Spieler online: <span id="player-count" class="font-semibold">0</span></p>
         </div>
 
+        <p id="error-message" class="text-red-400 mt-4 hidden">Server konnte nicht gefunden werden.</p>
+
         <h2 class="text-2xl font-bold mt-8">Beliebte Server</h2>
         <div id="popular-servers" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"></div>
     </div>
@@ -30,19 +32,23 @@
             try {
                 const response = await axios.get(`https://api.mcsrvstat.us/2/${serverIP}`);
                 const data = response.data;
+                if (!data.ip) {
+                    document.getElementById("error-message").classList.remove("hidden");
+                    return;
+                }
                 document.getElementById("server-info").classList.remove("hidden");
                 document.getElementById("server-ip").textContent = serverIP;
                 document.getElementById("server-status").textContent = data.online ? "Online" : "Offline";
                 document.getElementById("server-status").classList.add(data.online ? "text-green-400" : "text-red-400");
                 document.getElementById("player-count").textContent = data.players.online;
+                document.getElementById("error-message").classList.add("hidden");
             } catch (error) {
-                document.getElementById("server-status").textContent = "Fehler beim Abrufen";
-                document.getElementById("server-status").classList.add("text-red-400");
+                document.getElementById("error-message").classList.remove("hidden");
             }
         }
 
         async function fetchPopularServers() {
-            const servers = ["hypixel.net", "mineplex.com", "play.cubecraft.net"];
+            const servers = ["hypixel.net", "mineplex.com", "play.cubecraft.net", "mc.hypixel.net", "mc-central.net", "herobrine.org"];
             const container = document.getElementById("popular-servers");
             container.innerHTML = "";
             
@@ -54,12 +60,21 @@
                         <p class='font-bold'>${server}</p>
                         <p>Status: <span class='${data.online ? "text-green-400" : "text-red-400"}'>${data.online ? "Online" : "Offline"}</span></p>
                         <p>Spieler online: ${data.players.online}</p>
+                        <button onclick='copyToClipboard("${server}")' class='bg-blue-500 px-2 py-1 mt-2 rounded'>IP kopieren</button>
                     </div>`;
                     container.innerHTML += serverCard;
                 } catch (error) {
                     console.error(`Fehler beim Abrufen von ${server}`);
                 }
             }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("IP-Adresse kopiert: " + text);
+            }).catch(err => {
+                console.error("Fehler beim Kopieren: ", err);
+            });
         }
 
         fetchPopularServers();
